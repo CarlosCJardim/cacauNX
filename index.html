@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoCacau | Levantamento Científico de Sombreamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7;
+            color: #2D3748;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            height: 380px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        .tab-active {
+            border-bottom: 3px solid #38A169;
+            color: #2F855A;
+            font-weight: 600;
+        }
+        
+        .tab-inactive {
+            color: #718096;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-inactive:hover {
+            color: #4A5568;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #F1F1F1;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #CBD5E0;
+            border-radius: 3px;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Background), Forest Green (Success), Cocoa Brown (Details) -->
+    <!-- Application Structure Plan: 
+         - Home: Sumário científico dos principais artigos consultados.
+         - Physiology: Gráfico de curva de luz simulando a saturação fotossintética do cacau.
+         - Seedlings: Comparação de biomassa e altura em viveiro com telas (pretas vs coloridas).
+         - Production: Radar chart comparando Agrofloresta (SAF) com Monocultivo.
+    -->
+    <!-- Visualization & Content Choices:
+         - Line Chart (Physiology): To show the light saturation point and photoinhibition.
+         - Bar Chart (Seedlings): Comparison of shading intensities (30%, 50%, 75%).
+         - Radar Chart (Systems): Trade-offs between yield, resilience, and biodiversity.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header Navigation -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <span class="text-3xl mr-2">🌳</span>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">EcoCacau <span class="text-green-600 font-light">Ciência</span></h1>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <button onclick="switchTab('overview')" id="nav-overview" class="tab-active px-3 py-2 text-sm font-medium transition-colors">Resumo</button>
+                    <button onclick="switchTab('physiology')" id="nav-physiology" class="tab-inactive px-3 py-2 text-sm font-medium transition-colors">Fisiologia</button>
+                    <button onclick="switchTab('seedlings')" id="nav-seedlings" class="tab-inactive px-3 py-2 text-sm font-medium transition-colors">Mudas</button>
+                    <button onclick="switchTab('production')" id="nav-production" class="tab-inactive px-3 py-2 text-sm font-medium transition-colors">Cultivo Adulto</button>
+                </nav>
+                <div class="md:hidden">
+                    <select onchange="switchTab(this.value)" class="p-2 text-sm border rounded bg-white">
+                        <option value="overview">Resumo</option>
+                        <option value="physiology">Fisiologia</option>
+                        <option value="seedlings">Mudas</option>
+                        <option value="production">Cultivo Adulto</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- SECTION: OVERVIEW -->
+        <div id="overview" class="section-content block space-y-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Levantamento Bibliográfico: Efeitos do Sombreamento</h2>
+                <p class="text-lg text-gray-700 leading-relaxed">
+                    A cultura do cacau (<em>Theobroma cacao</em> L.) é classificada na literatura científica como uma espécie <strong>C3 tolerante à sombra</strong>. Este levantamento consolida dados de artigos em Português e Inglês sobre como a luz influencia desde o viveiro até a produtividade final em sistemas agroflorestais (SAFs).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-3">Principais Conclusões Científicas</h3>
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span>
+                            <span><strong>Proteção Foto-oxidativa:</strong> O sombreamento protege os fotossistemas contra a degradação da clorofila em condições de alta irradiância.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span>
+                            <span><strong>Regulação Térmica:</strong> Redução de até 4-5°C na temperatura da folha em sistemas sombreados comparado ao pleno sol.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span>
+                            <span><strong>Eficiência Hídrica:</strong> Menor déficit de pressão de vapor (DPV) sob sombra, reduzindo a taxa de transpiração excessiva.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-amber-50 p-6 rounded-xl border border-amber-200">
+                    <h3 class="font-bold text-amber-900 mb-3">Fontes de Pesquisa</h3>
+                    <p class="text-xs text-amber-800 italic">
+                        Artigos baseados em periódicos como: Agroforestry Systems, Scientia Horticulturae, Revista Brasileira de Fruticultura, e publicações técnicas da CEPLAC/Embrapa.
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="bg-white px-2 py-1 rounded text-[10px] font-bold text-amber-600 border border-amber-200">PORTUGUÊS</span>
+                        <span class="bg-white px-2 py-1 rounded text-[10px] font-bold text-amber-600 border border-amber-200">ENGLISH</span>
+                        <span class="bg-white px-2 py-1 rounded text-[10px] font-bold text-amber-600 border border-amber-200">PEER-REVIEWED</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: PHYSIOLOGY -->
+        <div id="physiology" class="section-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 space-y-4">
+                    <h2 class="text-2xl font-bold text-gray-900">Resposta Ecofisiológica</h2>
+                    <p class="text-sm text-gray-600">
+                        O cacau apresenta uma curva de saturação luminosa baixa. Aumentar a luz acima de certos limites não aumenta a fotossíntese e pode causar <strong>fotoinibição</strong>.
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border text-sm">
+                        <p class="font-bold text-green-700">Ponto de Saturação:</p>
+                        <p class="text-gray-500">Ocorre entre 400 e 600 µmol m⁻² s⁻¹ de radiação (PAR). Acima disso, a eficiência quântica cai drasticamente.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Condição do Estudo:</label>
+                        <select id="physSelect" class="w-full p-2 border rounded bg-white text-sm" onchange="updatePhysChart()">
+                            <option value="optimal">Sombreado (Optimal)</option>
+                            <option value="stress">Pleno Sol (Stress)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border">
+                    <h4 class="text-center font-bold text-gray-700 mb-4">Curva de Resposta Fotossintética (A/PAR)</h4>
+                    <div class="chart-container">
+                        <canvas id="physChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: SEEDLINGS (Mudas) -->
+        <div id="seedlings" class="section-content hidden space-y-6">
+            <div class="bg-gray-50 p-6 rounded-xl border mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Produção de Mudas (Viveiro)</h2>
+                <p class="text-gray-700 mt-2">
+                    A fase inicial exige maior controle. O sombreamento artificial por telas (Sombrite) é a norma científica, variando entre 30% a 75%.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-gray-700">Desenvolvimento de Mudas</h4>
+                        <select id="seedlingMetric" class="text-xs p-1 border rounded" onchange="updateSeedlingChart()">
+                            <option value="biomass">Biomassa Seca (g)</option>
+                            <option value="height">Altura (cm)</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="seedlingChart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h4 class="font-bold text-gray-800">Efeitos das Telas Coloridas</h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Artigos recentes (ex: Chromatinet) demonstram que o espectro da luz influencia a morfologia:
+                    </p>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="p-4 bg-white border-l-4 border-red-400 rounded shadow-sm">
+                            <p class="font-bold text-xs text-red-700 uppercase">Tela Vermelha (Red Net)</p>
+                            <p class="text-sm text-gray-600">Estimula o alongamento do caule e maior área foliar específica.</p>
+                        </div>
+                        <div class="p-4 bg-white border-l-4 border-gray-400 rounded shadow-sm">
+                            <p class="font-bold text-xs text-gray-700 uppercase">Tela Preta (Neutral)</p>
+                            <p class="text-sm text-gray-600">Redução térmica eficiente, mas sem alteração na qualidade da luz.</p>
+                        </div>
+                        <div class="p-4 bg-white border-l-4 border-blue-400 rounded shadow-sm">
+                            <p class="font-bold text-xs text-blue-700 uppercase">75% Sombreamento</p>
+                            <p class="text-sm text-gray-600">Pode causar estiolamento (crescimento fraco em busca de luz).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: PRODUCTION (SAFs vs Artificial) -->
+        <div id="production" class="section-content hidden space-y-6">
+            <h2 class="text-2xl font-bold text-gray-900">Sistemas de Cultivo Adulto</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border flex flex-col items-center">
+                    <h4 class="font-bold text-gray-700 mb-4">Comparativo: SAF vs. Monocultivo</h4>
+                    <div class="chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-4 italic">Dados normalizados (Escala 0-10)</p>
+                </div>
+                <div class="space-y-6">
+                    <div class="bg-white p-5 rounded-xl border-l-4 border-green-600 shadow-sm">
+                        <h5 class="font-bold text-gray-800">Sistemas Agroflorestais (SAFs)</h5>
+                        <p class="text-sm text-gray-600 mt-2">
+                            A literatura destaca que, embora o monocultivo possa ter picos de produtividade maiores com fertilização intensa, o SAF oferece <strong>estabilidade produtiva</strong> ao longo de décadas e melhor controle de doenças como a Vassoura-de-Bruxa devido ao microclima.
+                        </p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border-l-4 border-blue-600 shadow-sm">
+                        <h5 class="font-bold text-gray-800">Sombreamento Artificial no Campo</h5>
+                        <p class="text-sm text-gray-600 mt-2">
+                            Uso de telas em escala comercial é raro devido ao custo, mas serve como proteção contra "queima de sol" em variedades sensíveis em regiões de alta radiação.
+                        </p>
+                    </div>
+                    <div class="bg-green-100 p-4 rounded-lg">
+                        <p class="text-xs text-green-800">
+                            <strong>Nota:</strong> O equilíbrio ideal sugerido por artigos de campo é manter entre 30% e 40% de sombreamento para maximizar a fotossíntese líquida sem comprometer a floração.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 py-6 text-center text-sm">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Levantamento Técnico Baseado em Evidências Científicas - Cultura do Cacau</p>
+            <p class="text-xs mt-1">Dados meramente ilustrativos para fins de visualização de conceitos agronómicos.</p>
+        </div>
+    </footer>
+
+    <script>
+        // State
+        let activeTab = 'overview';
+        let physChart, seedlingChart, radarChart;
+
+        // Navigation
+        function switchTab(tabId) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('tab-active');
+                b.classList.add('tab-inactive');
+            });
+            const navBtn = document.getElementById(`nav-${tabId}`);
+            if (navBtn) {
+                navBtn.classList.remove('tab-inactive');
+                navBtn.classList.add('tab-active');
+            }
+            
+            activeTab = tabId;
+            initCharts();
+        }
+
+        // Charts Initialization
+        function initCharts() {
+            if (activeTab === 'physiology') updatePhysChart();
+            if (activeTab === 'seedlings') updateSeedlingChart();
+            if (activeTab === 'production') updateRadarChart();
+        }
+
+        function updatePhysChart() {
+            const ctx = document.getElementById('physChart').getContext('2d');
+            const condition = document.getElementById('physSelect').value;
+            
+            const labels = [0, 100, 200, 400, 600, 800, 1200, 1600, 2000];
+            const optimalData = [0, 3, 5.5, 7.5, 8.2, 8.0, 7.8, 7.2, 6.5];
+            const stressData = [0, 2.5, 4.2, 5.5, 5.2, 4.0, 2.8, 1.5, 0.5];
+            
+            if (physChart) physChart.destroy();
+            physChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: condition === 'optimal' ? 'A (Taxa de Assimilação de CO₂)' : 'A (Estresse Fotoinibitório)',
+                        data: condition === 'optimal' ? optimalData : stressData,
+                        borderColor: condition === 'optimal' ? '#38A169' : '#E53E3E',
+                        backgroundColor: condition === 'optimal' ? 'rgba(56, 161, 105, 0.1)' : 'rgba(229, 62, 62, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'PAR (µmol photons m⁻² s⁻¹)' } },
+                        y: { title: { display: true, text: 'A (µmol CO₂ m⁻² s⁻¹)' }, min: 0, max: 10 }
+                    }
+                }
+            });
+        }
+
+        function updateSeedlingChart() {
+            const ctx = document.getElementById('seedlingChart').getContext('2d');
+            const metric = document.getElementById('seedlingMetric').value;
+            
+            const labels = ['30% Sombra', '50% Sombra', '75% Sombra'];
+            const biomassData = [12.5, 18.2, 14.8];
+            const heightData = [28.4, 35.6, 48.2]; // 75% shows etiolation (taller but thinner)
+            
+            if (seedlingChart) seedlingChart.destroy();
+            seedlingChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: metric === 'biomass' ? 'Biomassa Seca (g)' : 'Altura (cm)',
+                        data: metric === 'biomass' ? biomassData : heightData,
+                        backgroundColor: ['#F6AD55', '#48BB78', '#63B3ED'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updateRadarChart() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if (radarChart) radarChart.destroy();
+            
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Produtividade', 'Resiliência Climática', 'Biodiversidade', 'Baixo Custo de Insumo', 'Controle de Pragas'],
+                    datasets: [
+                        {
+                            label: 'SAF (Sombreamento Natural)',
+                            data: [7, 10, 10, 9, 8],
+                            borderColor: '#38A169',
+                            backgroundColor: 'rgba(56, 161, 105, 0.2)'
+                        },
+                        {
+                            label: 'Monocultivo (Pleno Sol)',
+                            data: [9, 4, 2, 3, 5],
+                            borderColor: '#3182CE',
+                            backgroundColor: 'rgba(49, 130, 206, 0.2)'
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: { beginAtZero: true, max: 10 }
+                    }
+                }
+            });
+        }
+
+        window.onload = () => {
+            switchTab('overview');
+        };
+    </script>
+</body>
+</html>
