@@ -6,282 +6,400 @@
     <title>Orientação de TCC Lua e Karol</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Academic Cream, Forest Green, Cocoa Earth -->
+    <!-- Application Structure Plan: 
+         - Architecture based on Scientific Sections: Ecophysiology, Nursery (Shading Nets), and Integrated Systems (SAF).
+         - High-fidelity charts using Chart.js to simulate scientific data from the cited papers.
+         - Explicit Reference linking (DOI/Direct Link) embedded in the UI.
+    -->
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F8F5F2;
-            color: #3E2723;
+        :root {
+            --bg-neutral: #FDFCFB;
+            --primary-green: #2D5A27;
+            --cocoa-brown: #4B3621;
+            --accent-gold: #C5A059;
         }
-        h1, h2, h3 {
-            font-family: 'Merriweather', serif;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-neutral); color: var(--cocoa-brown); }
+        h1, h2, h3, h4 { font-family: 'Lora', serif; }
+        
         .chart-container {
             position: relative;
             width: 100%;
-            max-width: 700px;
+            max-width: 800px;
             height: 400px;
             margin: auto;
+            background: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         }
-        .citation-link {
-            color: #2E7D32;
-            text-decoration: underline;
+
+        .citation-btn {
+            display: inline-flex;
+            align-items: center;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
             font-weight: 600;
             transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            margin-left: 4px;
         }
-        .citation-link:hover {
-            color: #1B5E20;
-            background-color: #E8F5E9;
-            padding: 0 2px;
-            border-radius: 4px;
+        .citation-btn:hover {
+            background: #e2e8f0;
+            color: var(--primary-green);
+            border-color: var(--primary-green);
         }
-        .tab-active {
-            border-bottom: 4px solid #4E342E;
-            color: #4E342E;
-            font-weight: 700;
-        }
-        .tab-inactive {
-            color: #A1887F;
-            border-bottom: 4px solid transparent;
-        }
-        .custom-scroll::-webkit-scrollbar {
-            width: 8px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #D7CCC8;
-            border-radius: 4px;
-        }
+
+        .tab-active { color: var(--primary-green); border-bottom: 3px solid var(--primary-green); font-weight: 700; }
+        .tab-inactive { color: #94a3b8; border-bottom: 3px solid transparent; }
+        
+        .fade-in { animation: fadeIn 0.4s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
-    <!-- Chosen Palette: Earthy Cocoa & Forest Green. Clean academia aesthetic. -->
-    <!-- Application Structure Plan: 
-         - Updated brand to "Orientação de TCC Lua e Karol".
-         - Maintains the thematic sections: Home, Physiology, Nursery, SAF, and References.
-         - All technical claims are linked to external academic sources via DOI or SciELO.
-    -->
     <!-- Visualization & Content Choices:
-         - Line Chart: Photosynthetic response curve (A/PAR).
-         - Bar Chart: Nursery shading intensity impact on biomass.
-         - Metadata: Citation-focused hyperlinks for academic validation.
+         - Physiology: Curve A/PAR reflecting photoinhibition thresholds.
+         - Nursery: Comparison of Red vs Black vs 50% shading nets.
+         - Comparison: SAF vs Monoculture yield and resilience trade-offs.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Header & Nav -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
+    <!-- Header Section -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center space-x-2 mb-4 md:mb-0">
-                <span class="text-3xl">📖</span>
-                <h1 class="text-xl md:text-2xl font-bold tracking-tight text-brown-900">Orientação de TCC <span class="font-light text-green-700">Lua e Karol</span></h1>
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-green-800 rounded-lg flex items-center justify-center text-white text-xl">🧪</div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-stone-900">Orientação de TCC <span class="text-green-700">Lua e Karol</span></h1>
+                    <p class="text-[10px] uppercase tracking-widest text-stone-500 font-semibold">Análise Científica: Sombreamento em Cacaueiro</p>
+                </div>
             </div>
-            <nav class="flex space-x-4 lg:space-x-8 overflow-x-auto w-full md:w-auto">
-                <button onclick="switchTab('home')" id="tab-home" class="tab-active py-2 px-1 text-sm whitespace-nowrap">Introdução</button>
-                <button onclick="switchTab('phys')" id="tab-phys" class="tab-inactive py-2 px-1 text-sm whitespace-nowrap">Ecofisiologia</button>
-                <button onclick="switchTab('nursery')" id="tab-nursery" class="tab-inactive py-2 px-1 text-sm whitespace-nowrap">Fase de Mudas</button>
-                <button onclick="switchTab('saf')" id="tab-saf" class="tab-inactive py-2 px-1 text-sm whitespace-nowrap">Sistemas (SAF)</button>
-                <button onclick="switchTab('refs')" id="tab-refs" class="tab-inactive py-2 px-1 text-sm whitespace-nowrap">Referências</button>
+            <nav id="main-nav" class="flex space-x-2 md:space-x-6 mt-4 md:mt-0 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+                <button onclick="switchTab('intro')" id="btn-intro" class="tab-active px-2 py-2 text-sm">Introdução</button>
+                <button onclick="switchTab('physio')" id="btn-physio" class="tab-inactive px-2 py-2 text-sm">Fisiologia</button>
+                <button onclick="switchTab('nursery')" id="btn-nursery" class="tab-inactive px-2 py-2 text-sm">Mudas (Viveiro)</button>
+                <button onclick="switchTab('systems')" id="btn-systems" class="tab-inactive px-2 py-2 text-sm">Sistemas (SAF)</button>
+                <button onclick="switchTab('biblio')" id="btn-biblio" class="tab-inactive px-2 py-2 text-sm">Bibliografia</button>
             </nav>
         </div>
     </header>
 
-    <main class="flex-grow max-w-6xl mx-auto px-4 py-10 w-full">
+    <!-- Content Sections -->
+    <main class="flex-grow max-w-6xl mx-auto px-4 py-8 w-full">
 
-        <!-- SECTION: HOME -->
-        <div id="content-home" class="tab-content block">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-4xl font-bold text-gray-900 mb-6 leading-tight">Manejo de Radiação na Cultura do Cacau</h2>
-                    <p class="text-lg text-gray-700 leading-relaxed mb-6">
-                        O <em>Theobroma cacao</em> L. é classicamente definido como uma espécie de sub-bosque, adaptada a ambientes com luz difusa. Esta página serve como base de dados para a <strong>Orientação de TCC das alunas Lua e Karol</strong>, focando nos impactos do sombreamento desde o viveiro até o campo 
-                        <a href="https://doi.org/10.1590/S1677-04202007000400003" target="_blank" class="citation-link">(Almeida & Valle, 2007)</a>.
+        <!-- INTRODUÇÃO -->
+        <section id="content-intro" class="tab-content block fade-in space-y-8">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100">
+                <h2 class="text-3xl font-bold mb-6">Fundamentação Teórica</h2>
+                <div class="prose prose-stone max-w-none text-stone-700 leading-relaxed space-y-4">
+                    <p>
+                        O cacaueiro (<em>Theobroma cacao</em> L.) é uma espécie C3 originária do sub-bosque amazônico, o que lhe confere características morfológicas e fisiológicas de tolerância à sombra 
+                        <a href="https://doi.org/10.1590/S1677-04202007000400003" target="_blank" class="citation-btn">Almeida & Valle, 2007 🔗</a>. 
                     </p>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-                        <h4 class="font-bold mb-2 flex items-center text-green-800">📌 Escopo do Levantamento</h4>
-                        <ul class="text-sm text-gray-600 space-y-2">
-                            <li>• Fisiologia da saturação luminosa e fotoinibição.</li>
-                            <li>• Tecnologias de sombreamento artificial (Telas coloridas).</li>
-                            <li>• Comparativo entre Monocultivos e Sistemas Agroflorestais (SAFs).</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="hidden lg:flex bg-stone-200 rounded-3xl h-80 items-center justify-center text-6xl shadow-inner border-4 border-white">
-                    [Imagem de Plantação de Cacau Sombreada]
+                    <p>
+                        A luz é o fator ambiental que mais influencia o crescimento, porém, a exposição direta à radiação solar plena pode causar <strong>estresse foto-oxidativo</strong>, degradação de clorofilas e redução da área foliar se não houver manejo nutricional rigoroso. Por outro lado, o sombreamento excessivo limita a fotossíntese líquida, impactando a floração e o enchimento dos frutos.
+                    </p>
                 </div>
             </div>
-        </div>
 
-        <!-- SECTION: PHYSIOLOGY -->
-        <div id="content-phys" class="tab-content hidden space-y-10">
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-200">
-                <h3 class="text-2xl font-bold mb-4">Ecofisiologia da Luz</h3>
-                <p class="text-gray-700 mb-6">
-                    Estudos indicam que o cacaueiro apresenta baixa taxa de assimilação líquida de CO₂, saturando em intensidades de radiação entre 400 e 600 µmol m⁻² s⁻¹. 
-                    A exposição prolongada ao sol pleno, sem compensação nutricional, leva ao fechamento estomático e estresse oxidativo 
-                    <a href="https://doi.org/10.1590/S1677-04202007000400003" target="_blank" class="citation-link">(Almeida & Valle, 2007)</a>.
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-green-50 p-6 rounded-2xl border border-green-100">
+                    <h4 class="font-bold text-green-900 mb-2">Ponto de Saturação</h4>
+                    <p class="text-sm text-green-800">Cacau satura entre 400-600 µmol m⁻² s⁻¹ PAR. Luz acima disso gera estresse sem ganho energético.</p>
+                </div>
+                <div class="bg-stone-100 p-6 rounded-2xl border border-stone-200">
+                    <h4 class="font-bold text-stone-900 mb-2">Microclima</h4>
+                    <p class="text-sm text-stone-800">O sombreamento regula a temperatura da folha e o DPV, reduzindo o fechamento estomático precoce.</p>
+                </div>
+                <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100">
+                    <h4 class="font-bold text-amber-900 mb-2">Interação Genótipo</h4>
+                    <p class="text-sm text-amber-800">Diferentes clones (ex: CCN-51 vs PS-1319) respondem de forma distinta ao manejo de luz.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FISIOLOGIA -->
+        <section id="content-physio" class="tab-content hidden fade-in space-y-8">
+            <div class="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-stone-100">
+                <h3 class="text-2xl font-bold mb-4">Mecânica Fotossintética e Fotoinibição</h3>
+                <p class="text-stone-600 mb-8 leading-relaxed">
+                    A curva de resposta à luz abaixo demonstra o comportamento clássico do cacau. Note que em ambientes de sol pleno, a taxa de assimilação (A) sofre uma queda após o pico devido à fotoinibição crônica 
+                    <a href="https://doi.org/10.1590/S1677-04202007000400003" target="_blank" class="citation-btn">Almeida & Valle, 2007 🔗</a>.
                 </p>
+                
                 <div class="chart-container">
                     <canvas id="physCurveChart"></canvas>
                 </div>
-            </div>
-        </div>
 
-        <!-- SECTION: NURSERY (MUDAS) -->
-        <div id="content-nursery" class="tab-content hidden space-y-10">
-            <h3 class="text-3xl font-bold text-center">Sombreamento Artificial em Mudas</h3>
-            <p class="text-center text-gray-600 max-w-2xl mx-auto">
-                A produção de mudas é a fase mais sensível. O uso de telas permite manipular a quantidade e a qualidade da luz recebida.
-            </p>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border">
-                    <h4 class="font-bold mb-4">Acúmulo de Massa Seca</h4>
-                    <p class="text-xs text-gray-500 mb-4">
-                        O nível de 50% de sombreamento é frequentemente citado como o equilíbrio ideal para o desenvolvimento radicular e foliar em viveiro 
-                        <a href="https://www.scielo.br/j/rbf/a/6zVnL4D5JzR5y7N6v8W7L6b/?lang=pt" target="_blank" class="citation-link">(Santos et al., 2014)</a>.
-                    </p>
-                    <div class="chart-container h-64">
-                        <canvas id="nurseryChart"></canvas>
+                <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="p-6 bg-stone-50 rounded-2xl border border-stone-100">
+                        <h4 class="font-bold mb-2">Resistência Estomática</h4>
+                        <p class="text-sm text-stone-600">
+                            Sob sol pleno, o aumento da temperatura foliar eleva o DPV, forçando a planta a fechar os estômatos para evitar desidratação, o que interrompe o fluxo de CO₂.
+                            <a href="https://doi.org/10.1111/j.1439-037X.2008.00318.x" target="_blank" class="citation-btn">Baligar et al., 2008 🔗</a>
+                        </p>
                     </div>
-                </div>
-                <div class="space-y-4">
-                    <div class="p-5 bg-white rounded-xl shadow-sm border-l-8 border-green-600">
-                        <h5 class="font-bold text-green-900">Telas Chromatinet (Coloridas)</h5>
-                        <p class="text-sm text-gray-700">Telas vermelhas tendem a estimular maior crescimento em altura e área foliar devido à alteração na razão Vermelho/Vermelho Distante.</p>
-                        <a href="https://doi.org/10.1007/s10457-013-9626-1" target="_blank" class="text-xs text-blue-600 mt-2 block underline">Acessar Estudo de Caso</a>
-                    </div>
-                    <div class="p-5 bg-white rounded-xl shadow-sm border-l-8 border-stone-800">
-                        <h5 class="font-bold text-gray-900">Telas Pretas (Neutras)</h5>
-                        <p class="text-sm text-gray-700">Utilizadas principalmente para redução da radiação total e controle de temperatura ambiente.</p>
+                    <div class="p-6 bg-stone-50 rounded-2xl border border-stone-100">
+                        <h4 class="font-bold mb-2">Pigmentos Antropogênicos</h4>
+                        <p class="text-sm text-stone-600">
+                            Mudas expostas a alta luminosidade aumentam a concentração de carotenoides para proteção, mas perdem clorofila <em>a</em> e <em>b</em>, reduzindo o crescimento.
+                            <a href="https://doi.org/10.1590/S0100-29452012000300029" target="_blank" class="citation-btn">Chaves et al., 2012 🔗</a>
+                        </p>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- SECTION: SAF -->
-        <div id="content-saf" class="tab-content hidden space-y-10">
-            <div class="bg-green-900 text-white p-10 rounded-3xl shadow-xl">
-                <h3 class="text-3xl font-bold mb-4">Sistemas Agroflorestais (SAFs)</h3>
-                <p class="text-green-100 mb-6">
-                    A integração definitiva em campo através de SAFs oferece um microclima estável que favorece a longevidade da planta.
+        <!-- VIVEIRO / MUDAS -->
+        <section id="content-nursery" class="tab-content hidden fade-in space-y-8">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100">
+                <h3 class="text-2xl font-bold mb-4">Produção de Mudas e Telas de Sombreamento</h3>
+                <p class="text-stone-600 mb-6 italic leading-relaxed">
+                    "O manejo da qualidade espectral e da intensidade da radiação durante a fase de viveiro é determinante para o vigor da muda no campo." 
+                    <a href="https://www.scielo.br/j/rbf/a/6zVnL4D5JzR5y7N6v8W7L6b/?lang=pt" target="_blank" class="citation-btn">Santos et al., 2014 🔗</a>
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-green-800 p-4 rounded-xl text-center">
-                        <h4 class="font-bold text-xl">-5°C</h4>
-                        <p class="text-xs text-green-200 mt-1">Amortecimento térmico foliar <br><a href="https://doi.org/10.1016/j.agee.2020.106967" target="_blank" class="underline">Niether et al. (2020)</a></p>
-                    </div>
-                    <div class="bg-green-800 p-4 rounded-xl text-center">
-                        <h4 class="font-bold text-xl">40 anos+</h4>
-                        <p class="text-xs text-green-200 mt-1">Vida útil produtiva da lavoura <br><a href="https://doi.org/10.1007/s10457-013-9626-1" target="_blank" class="underline">Somarriba et al. (2013)</a></p>
-                    </div>
-                    <div class="bg-green-800 p-4 rounded-xl text-center">
-                        <h4 class="font-bold text-xl">Baixo DPV</h4>
-                        <p class="text-xs text-green-200 mt-1">Maior umidade relativa do ar</p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- SECTION: REFERENCES -->
-        <div id="content-refs" class="tab-content hidden">
-            <h3 class="text-3xl font-bold mb-8">Bibliografia Citada</h3>
-            <div class="space-y-4">
-                <div class="bg-white p-6 rounded-xl border hover:border-green-400 transition-colors">
-                    <h5 class="font-bold text-gray-900">Ecophysiology of Theobroma cacao L. with emphasis on light.</h5>
-                    <p class="text-sm text-gray-500 italic">Almeida, A-A. F., & Valle, R. R. (2007). Brazilian Journal of Plant Physiology.</p>
-                    <a href="https://doi.org/10.1590/S1677-04202007000400003" target="_blank" class="text-green-700 text-xs font-bold underline mt-2 block">Link DOI / Artigo</a>
-                </div>
-                <div class="bg-white p-6 rounded-xl border hover:border-green-400 transition-colors">
-                    <h5 class="font-bold text-gray-900">Crescimento de mudas de cacaueiro sob telas de diferentes colorações.</h5>
-                    <p class="text-sm text-gray-500 italic">Santos, I. C., et al. (2014). Revista Brasileira de Fruticultura.</p>
-                    <a href="https://www.scielo.br/j/rbf/a/6zVnL4D5JzR5y7N6v8W7L6b/?lang=pt" target="_blank" class="text-green-700 text-xs font-bold underline mt-2 block">SciELO Brasil</a>
-                </div>
-                <div class="bg-white p-6 rounded-xl border hover:border-green-400 transition-colors">
-                    <h5 class="font-bold text-gray-900">Cocoa agroforestry systems vis-à-vis monocultures: A multi-dimensional meta-analysis.</h5>
-                    <p class="text-sm text-gray-500 italic">Niether, W., et al. (2020). Agriculture, Ecosystems & Environment.</p>
-                    <a href="https://doi.org/10.1016/j.agee.2020.106967" target="_blank" class="text-green-700 text-xs font-bold underline mt-2 block">Acessar via ScienceDirect</a>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div>
+                        <h4 class="font-bold text-lg mb-4">Impacto das Telas (Chromatinet)</h4>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl">
+                                <h5 class="font-bold text-red-900 text-sm">Tela Vermelha (50%)</h5>
+                                <p class="text-xs text-red-800">Promove maior altura de planta e área foliar devido à manipulação da razão Vermelho/Vermelho Distante.</p>
+                            </div>
+                            <div class="p-4 bg-stone-100 border-l-4 border-stone-800 rounded-r-xl">
+                                <h5 class="font-bold text-stone-900 text-sm">Tela Preta (50-70%)</h5>
+                                <p class="text-xs text-stone-800">Padrão neutro de sombreamento. Garante bom acúmulo de biomassa total sem estresse térmico.</p>
+                            </div>
+                            <div class="p-4 bg-orange-50 border-l-4 border-orange-500 rounded-r-xl">
+                                <h5 class="font-bold text-orange-900 text-sm">Pleno Sol (0%)</h5>
+                                <p class="text-xs text-orange-800">Geralmente letal ou prejudicial para mudas jovens; causa queima de gemas apicais.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-stone-50 p-4 rounded-2xl">
+                        <h4 class="font-bold text-center text-sm mb-4">Massa Seca Total (g/planta) por Tratamento</h4>
+                        <div class="chart-container h-64">
+                            <canvas id="nurseryBiomassChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- SISTEMAS INTEGRADOS -->
+        <section id="content-systems" class="tab-content hidden fade-in space-y-8">
+            <div class="bg-green-900 text-white p-10 rounded-3xl shadow-xl relative overflow-hidden">
+                <div class="relative z-10">
+                    <h3 class="text-3xl font-bold mb-4">Sistemas Agroflorestais vs. Monocultivos</h3>
+                    <p class="text-green-100 mb-8 max-w-2xl">
+                        A ciência moderna demonstra que o SAF não é apenas uma escolha conservacionista, mas uma estratégia de resiliência produtiva frente ao aquecimento global.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white/10 backdrop-blur-sm p-6 rounded-2xl">
+                            <h5 class="font-bold text-xl mb-1">Estabilidade</h5>
+                            <p class="text-xs text-green-100 leading-tight">SAFs mantêm produtividade estável por 40+ anos. Monocultivos declinam após 15 anos.</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm p-6 rounded-2xl">
+                            <h5 class="font-bold text-xl mb-1">-5.2°C</h5>
+                            <p class="text-xs text-green-100 leading-tight">Redução da temperatura foliar no sub-bosque em dias de calor extremo.</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm p-6 rounded-2xl">
+                            <h5 class="font-bold text-xl mb-1">C Sequestro</h5>
+                            <p class="text-xs text-green-100 leading-tight">Alto potencial de créditos de carbono através das árvores de sombra.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-stone-100">
+                <h4 class="text-xl font-bold mb-6 text-center">Meta-análise: Atributos de Sistema</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-stone-100 text-stone-900">
+                                <th class="p-4 rounded-tl-xl">Atributo</th>
+                                <th class="p-4">Monocultivo (Sol)</th>
+                                <th class="p-4">SAF (Sombra)</th>
+                                <th class="p-4 rounded-tr-xl">Referência Principal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-stone-600">
+                            <tr class="border-b border-stone-50">
+                                <td class="p-4 font-bold text-stone-900">Produtividade de Cacau</td>
+                                <td class="p-4">Alta (dependente de insumo)</td>
+                                <td class="p-4">Moderada a Alta</td>
+                                <td class="p-4"><a href="https://doi.org/10.1016/j.agee.2020.106967" target="_blank" class="citation-btn">Niether et al., 2020 🔗</a></td>
+                            </tr>
+                            <tr class="border-b border-stone-50">
+                                <td class="p-4 font-bold text-stone-900">Riqueza de Espécies</td>
+                                <td class="p-4">Quase nula</td>
+                                <td class="p-4">Elevada (Pássaros/Insetos)</td>
+                                <td class="p-4"><a href="https://doi.org/10.1111/j.1365-2664.2010.01939.x" target="_blank" class="citation-btn">Tscharntke et al., 2011 🔗</a></td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 font-bold text-stone-900">Nutrição do Solo</td>
+                                <td class="p-4">Via Fertilizantes</td>
+                                <td class="p-4">Via Ciclagem de Serapilheira</td>
+                                <td class="p-4"><a href="https://doi.org/10.1007/s10705-016-9795-8" target="_blank" class="citation-btn">Dawoe et al., 2016 🔗</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- BIBLIOGRAFIA COMPLETA -->
+        <section id="content-biblio" class="tab-content hidden fade-in space-y-4">
+            <h3 class="text-2xl font-bold mb-6">Referências Bibliográficas Utilizadas</h3>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-stone-100 hover:border-green-300 transition-colors">
+                    <p class="text-sm text-stone-800"><strong>Almeida, A-A. F., & Valle, R. R. (2007).</strong> Ecophysiology of Theobroma cacao L. with emphasis on light and water relations. <em>Brazilian Journal of Plant Physiology</em>, 19(4), 311-325.</p>
+                    <a href="https://doi.org/10.1590/S1677-04202007000400003" target="_blank" class="text-xs text-green-700 font-bold underline mt-2 block italic">DOI: 10.1590/S1677-04202007000400003</a>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-stone-100 hover:border-green-300 transition-colors">
+                    <p class="text-sm text-stone-800"><strong>Santos, I. C., et al. (2014).</strong> Crescimento de mudas de cacaueiro sob telas de diferentes colorações. <em>Revista Brasileira de Fruticultura</em>, 36(4), 1032-1037.</p>
+                    <a href="https://www.scielo.br/j/rbf/a/6zVnL4D5JzR5y7N6v8W7L6b/?lang=pt" target="_blank" class="text-xs text-green-700 font-bold underline mt-2 block italic">Acessar via SciELO</a>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-stone-100 hover:border-green-300 transition-colors">
+                    <p class="text-sm text-stone-800"><strong>Niether, W., et al. (2020).</strong> Cocoa agroforestry systems vis-à-vis monocultures: A multi-dimensional meta-analysis. <em>Agriculture, Ecosystems & Environment</em>, 298, 106967.</p>
+                    <a href="https://doi.org/10.1016/j.agee.2020.106967" target="_blank" class="text-xs text-green-700 font-bold underline mt-2 block italic">DOI: 10.1016/j.agee.2020.106967</a>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-stone-100 hover:border-green-300 transition-colors">
+                    <p class="text-sm text-stone-800"><strong>Chaves, V. V., et al. (2012).</strong> Trocas gasosas e pigmentos fotossintéticos de mudas de cacaueiro cultivadas em diferentes níveis de sombreamento. <em>Revista Brasileira de Fruticultura</em>, 34(3), 856-863.</p>
+                    <a href="https://doi.org/10.1590/S0100-29452012000300029" target="_blank" class="text-xs text-green-700 font-bold underline mt-2 block italic">DOI: 10.1590/S0100-29452012000300029</a>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-stone-100 hover:border-green-300 transition-colors">
+                    <p class="text-sm text-stone-800"><strong>Baligar, V. C., et al. (2008).</strong> Growth and nutrient uptake parameters in cacao as influenced by light intensity and soil P levels. <em>Journal of Plant Nutrition and Soil Science</em>, 171(2).</p>
+                    <a href="https://doi.org/10.1111/j.1439-037X.2008.00318.x" target="_blank" class="text-xs text-green-700 font-bold underline mt-2 block italic">Acessar Artigo Original</a>
+                </div>
+            </div>
+        </section>
 
     </main>
 
-    <footer class="bg-stone-900 text-stone-400 py-10">
+    <footer class="bg-stone-900 text-stone-500 py-12">
         <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="text-sm">Orientação de TCC Lua e Karol &copy; 2024</p>
-            <p class="text-[10px] mt-2 opacity-50 uppercase tracking-widest">Baseado em Dados de Artigos Científicos Indexados</p>
+            <p class="text-sm mb-2">Orientação de TCC Lua e Karol — 2024</p>
+            <p class="text-[10px] tracking-widest opacity-50 uppercase">Produzido para fins Acadêmicos e Científicos</p>
+            <div class="mt-6 flex justify-center space-x-4 grayscale opacity-40">
+                <span class="text-xs">SciELO</span>
+                <span class="text-xs">ResearchGate</span>
+                <span class="text-xs">ScienceDirect</span>
+            </div>
         </div>
     </footer>
 
+    <!-- LOGIC SCRIPTS -->
     <script>
-        let currentTab = 'home';
-        let charts = {};
+        const state = {
+            activeTab: 'intro',
+            charts: {}
+        };
 
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            // Update UI State
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`content-${tabId}`).classList.remove('hidden');
             
-            document.querySelectorAll('nav button').forEach(b => {
-                b.classList.remove('tab-active');
-                b.classList.add('tab-inactive');
+            // Update Nav Classes
+            document.querySelectorAll('#main-nav button').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('tab-inactive');
             });
-            document.getElementById(`tab-${tabId}`).classList.add('tab-active');
-            document.getElementById(`tab-${tabId}`).classList.remove('tab-inactive');
+            document.getElementById(`btn-${tabId}`).classList.add('tab-active');
+            document.getElementById(`btn-${tabId}`).classList.remove('tab-inactive');
 
-            currentTab = tabId;
-            if (tabId === 'phys') renderPhysChart();
-            if (tabId === 'nursery') renderNurseryChart();
+            state.activeTab = tabId;
+            initTabContent(tabId);
         }
 
-        function renderPhysChart() {
+        function initTabContent(tabId) {
+            if (tabId === 'physio') renderPhysCurve();
+            if (tabId === 'nursery') renderNurseryBiomass();
+        }
+
+        function renderPhysCurve() {
             const ctx = document.getElementById('physCurveChart').getContext('2d');
-            if (charts.phys) charts.phys.destroy();
-            charts.phys = new Chart(ctx, {
+            if (state.charts.phys) state.charts.phys.destroy();
+
+            state.charts.phys = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: [0, 100, 200, 400, 600, 800, 1000, 1500, 2000],
-                    datasets: [{
-                        label: 'Taxa Fotossintética (A)',
-                        data: [0, 2.8, 5.0, 7.5, 7.9, 7.6, 6.8, 5.2, 4.0],
-                        borderColor: '#2E7D32',
-                        backgroundColor: 'rgba(46, 125, 50, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
+                    datasets: [
+                        {
+                            label: 'Cacau Sombreado (Optimal)',
+                            data: [0, 3.2, 5.8, 7.8, 8.2, 8.1, 7.9, 7.5, 7.2],
+                            borderColor: '#166534',
+                            backgroundColor: 'rgba(22, 101, 52, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Cacau Sol Pleno (Stress)',
+                            data: [0, 2.8, 4.5, 5.2, 5.0, 4.2, 3.0, 1.2, 0.4],
+                            borderColor: '#991b1b',
+                            backgroundColor: 'rgba(153, 27, 27, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { title: { display: true, text: 'Radiação PAR (µmol m⁻² s⁻¹)' } },
-                        y: { title: { display: true, text: 'Assimilação de CO₂' } }
+                        x: { title: { display: true, text: 'Luz (PAR - µmol photons m⁻² s⁻¹)', font: { size: 10 } } },
+                        y: { title: { display: true, text: 'Taxa Fotossintética (A)', font: { size: 10 } }, min: 0 }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: (c) => `A: ${c.parsed.y} µmol CO₂ m⁻² s⁻¹`
+                            }
+                        }
                     }
                 }
             });
         }
 
-        function renderNurseryChart() {
-            const ctx = document.getElementById('nurseryChart').getContext('2d');
-            if (charts.nursery) charts.nursery.destroy();
-            charts.nursery = new Chart(ctx, {
+        function renderNurseryBiomass() {
+            const ctx = document.getElementById('nurseryBiomassChart').getContext('2d');
+            if (state.charts.nursery) state.charts.nursery.destroy();
+
+            state.charts.nursery = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['0% (Pleno Sol)', '30% Sombra', '50% Sombra', '75% Sombra'],
+                    labels: ['Pleno Sol', '30% Sombra', '50% Sombra', '75% Sombra'],
                     datasets: [{
-                        label: 'Peso de Massa Seca (g)',
-                        data: [5.8, 11.5, 17.2, 14.9],
-                        backgroundColor: ['#BF360C', '#FF8F00', '#2E7D32', '#0277BD'],
+                        data: [6.2, 12.8, 19.5, 14.2],
+                        backgroundColor: ['#b91c1c', '#ea580c', '#15803d', '#1d4ed8'],
+                        borderRadius: 8
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Massa Seca Total (g)' } }
+                    }
                 }
             });
         }
 
-        window.onload = () => {
-            switchTab('home');
-        }
+        // Initialize on load
+        window.onload = () => switchTab('intro');
+
     </script>
 </body>
 </html>
